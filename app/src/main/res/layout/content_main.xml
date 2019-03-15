@@ -8,6 +8,17 @@
     tools:context="com.example.delixie.myapplication.MainActivity"
     tools:showIn="@layout/activity_main">
 
+    <Button
+        android:id="@+id/btWifi2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="100dp"
+        android:onClick="onEnableWifi2"
+        android:text="延时开启"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/tvCurrentTime"
         android:layout_width="wrap_content"

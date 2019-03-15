@@ -24,6 +24,7 @@ import  android.os.PowerManager;
 import  android.os.PowerManager.WakeLock;
 import  android.content.Intent;
 import  android.view.WindowManager;
+import android.os.CountDownTimer;
 
 public class MainActivity extends AppCompatActivity {
     private TextView tvCurrentTime;
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btDaySub;
 
     private Button btWifi;
+    private Button btWifi2;
 
     private CheckBox cbSwitch;
 
@@ -58,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
     private int nMinute = 30;
     private boolean bIsChecked = false;
     private WakeLock wakeLock;
+
+    private int delayTime = 30;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
         btYearSub = (Button) findViewById(R.id.btYearSub);
 
         btWifi = (Button) findViewById(R.id.btWifi);
+        btWifi2 = (Button) findViewById(R.id.btWifi2);
 
         cbSwitch = (CheckBox) findViewById(R.id.cbSwitch);
 
@@ -301,6 +307,32 @@ public class MainActivity extends AppCompatActivity {
         }else{
             return  Integer.toString(num);
         }
+    }
+
+    public void onEnableWifi2(View view){
+
+        btWifi2.setText("进行中");
+
+        CountDownTimer cdt = new CountDownTimer(1000 * 60 * 30, 1000 * 60 * 30)//参数1：计时总时间，参数2：每次扣除时间数
+        {
+
+            @Override
+            public void onTick(long millisUntilFinished)
+            {
+                //定时时间到执行动作;
+            }
+
+            @Override
+
+            public void onFinish() {
+
+                wifiManager.setWifiEnabled(false);
+                btWifi.setText("开启");
+            }
+
+        };
+
+        cdt.start();
     }
 
 }
