@@ -13,6 +13,8 @@ import android.content.Context;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.ImageView;
+
 import java.util.Calendar;
 import android.os.Message;
 import android.os.Handler;
@@ -50,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
     private Button btWifi2;
 
     private CheckBox cbSwitch;
+
+    private Button btScreen;
+    private ImageView screenImageView;
+
 
     private WifiManager wifiManager;
 
@@ -104,6 +110,11 @@ public class MainActivity extends AppCompatActivity {
         btWifi2 = (Button) findViewById(R.id.btWifi2);
 
         cbSwitch = (CheckBox) findViewById(R.id.cbSwitch);
+
+
+        btScreen = (Button) findViewById(R.id.btScreen);
+        screenImageView = (ImageView) findViewById(R.id.imageView);
+        screenImageView.setZ(100.0f);
 
         final Handler startTimehandler = new Handler(){
              public void handleMessage(android.os.Message msg) {
@@ -335,4 +346,7 @@ public class MainActivity extends AppCompatActivity {
         cdt.start();
     }
 
+    public void onScreen(View view){
+        screenImageView.setVisibility(View.VISIBLE);
+    }
 }
