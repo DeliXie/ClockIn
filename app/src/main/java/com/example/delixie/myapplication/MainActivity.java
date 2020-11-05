@@ -30,44 +30,11 @@ import android.os.CountDownTimer;
 
 public class MainActivity extends AppCompatActivity {
     private TextView tvCurrentTime;
-    private TextView tvYear;
-    private TextView tvMonth;
-    private TextView tvDay;
-    private TextView tvHours;
-    private TextView tvMinutes;
-
-    private Button btHoursPlus;
-    private Button btHoursSub;
-    private Button btMinutesPlus;
-    private Button btMinutesSub;
-
-    private Button btYearPlus;
-    private Button btYearSub;
-    private Button btMonthPlus;
-    private Button btMonthSub;
-    private Button btDayPlus;
-    private Button btDaySub;
-
-    private Button btWifi;
-    private Button btWifi2;
-
-    private CheckBox cbSwitch;
-
-    private Button btScreen;
-    private ImageView screenImageView;
-
-
     private WifiManager wifiManager;
-
-    private int nYear = 2019;
-    private int nMonth = 3;
-    private int nDay = 1;
-    private int nHour = 9;
-    private int nMinute = 30;
-    private boolean bIsChecked = false;
-    private WakeLock wakeLock;
-
-    private int delayTime = 30;
+    private boolean bIsPunchIn = true;
+    private boolean bIsPunchOut = false;
+    private int timePunchIn = 0;//Math.random() * 28.0;
+    private int timePunchOut = 0;//Math.random() * 28.0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,33 +55,14 @@ public class MainActivity extends AppCompatActivity {
         wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         tvCurrentTime = (TextView) findViewById(R.id.tvCurrentTime);
-        tvYear = (TextView) findViewById(R.id.tvYear);
-        tvMonth = (TextView) findViewById(R.id.tvMonth);
-        tvDay = (TextView) findViewById(R.id.tvDay);
-        tvHours = (TextView) findViewById(R.id.tvHours);
-        tvMinutes = (TextView) findViewById(R.id.tvMinutes);
 
-        btHoursPlus = (Button) findViewById(R.id.btHoursPlus);
-        btHoursSub = (Button) findViewById(R.id.btHoursSub);
-        btMinutesPlus = (Button) findViewById(R.id.btMinutesPlus);
-        btMinutesSub = (Button) findViewById(R.id.btMinutesSub);
+        if (!bIsPunchIn){
+            timePunchIn = (int)Math.floor(Math.random() * 28.0);
+        }
 
-        btDayPlus = (Button) findViewById(R.id.btDayPlus);
-        btDaySub = (Button) findViewById(R.id.btDaySub);
-        btDayPlus = (Button) findViewById(R.id.btDayPlus);
-        btDaySub = (Button) findViewById(R.id.btDaySub);
-        btYearPlus = (Button) findViewById(R.id.btYearPlus);
-        btYearSub = (Button) findViewById(R.id.btYearSub);
-
-        btWifi = (Button) findViewById(R.id.btWifi);
-        btWifi2 = (Button) findViewById(R.id.btWifi2);
-
-        cbSwitch = (CheckBox) findViewById(R.id.cbSwitch);
-
-
-        btScreen = (Button) findViewById(R.id.btScreen);
-        screenImageView = (ImageView) findViewById(R.id.imageView);
-        screenImageView.setZ(100.0f);
+        if (!bIsPunchOut){
+            timePunchOut = (int)Math.floor(Math.random() * 15.0);
+        }
 
         final Handler startTimehandler = new Handler(){
              public void handleMessage(android.os.Message msg) {
@@ -124,21 +72,73 @@ public class MainActivity extends AppCompatActivity {
                  int day = calendar.get(Calendar.DAY_OF_MONTH);
                  int hour = calendar.get(Calendar.HOUR_OF_DAY);
                  int minute = calendar.get(Calendar.MINUTE);
+                 int week = calendar.get(Calendar.DAY_OF_WEEK);
 
-                 String time = "当前时间：" +
-                         getTimeStr(year) + '年' +
+                 String time = getTimeStr(year) + '年' +
                          getTimeStr(month) + '月' +
                          getTimeStr(day) + '日' +
                          getTimeStr(hour) + '点' +
                          getTimeStr(minute) + '分';
+
+                 switch (week) {
+                     case Calendar.SUNDAY:
+                         time += " 周日";
+                         break;
+                     case Calendar.MONDAY:
+                         time += " 周一";
+                         break;
+                     case Calendar.TUESDAY:
+                         time += " 周二";
+                         break;
+                     case Calendar.WEDNESDAY:
+                         time += " 周三";
+                         break;
+                     case Calendar.THURSDAY:
+                         time += " 周四";
+                         break;
+                     case Calendar.FRIDAY:
+                         time += " 周五";
+                         break;
+                     case Calendar.SATURDAY:
+                         time += " 周六";
+                         break;
+                     default:
+                         break;
+                 }
+
                  tvCurrentTime.setText(time);
 
-                if (bIsChecked && year == nYear && month == nMonth && day == nDay && hour == nHour && minute == nMinute){
-                    wifiManager.setWifiEnabled(true);
-                    btWifi.setText("禁用WIFI");
-                    bIsChecked = false;
-                    cbSwitch.setChecked(false);
-                }
+                 if (week != Calendar.SUNDAY && week != Calendar.SATURDAY){
+                    if (!bIsPunchIn){
+                        if (hour == 9 && minute == timePunchIn){
+                            wifiManager.setWifiEnabled(true);
+                            bIsPunchIn = true;
+                            bIsPunchOut = false;
+                            timePunchOut = (int)Math.floor(Math.random() * 15.0);
+                        }
+                    }
+
+                    if (!bIsPunchOut){
+                        if (hour == 18 && minute == (timePunchOut + 30)){
+                            wifiManager.setWifiEnabled(false);
+                            bIsPunchOut = true;
+                            bIsPunchIn = false;
+                            timePunchIn = (int)Math.floor(Math.random() * 28.0);
+                        }
+                    }
+
+                    if (bIsPunchIn&&!bIsPunchOut){
+                        if (!wifiManager.isWifiEnabled()){
+                            wifiManager.setWifiEnabled(true);
+                        }
+                    }
+
+                     if (!bIsPunchIn&&bIsPunchOut){
+                         if (wifiManager.isWifiEnabled()){
+                             wifiManager.setWifiEnabled(false);
+                         }
+                     }
+                 }
             }
         };
         new Timer("计时器").scheduleAtFixedRate(new TimerTask() {
@@ -149,38 +149,12 @@ public class MainActivity extends AppCompatActivity {
             }
         }, 0, 1000L);
 
-        if (wifiManager.isWifiEnabled()) {
-            btWifi.setText("禁用");
-        } else {
-            btWifi.setText("开启");
-        }
-
-        tvHours.setText(getTimeStr(nHour) + '点');
-        tvMinutes.setText(getTimeStr(nMinute) + '分');
-
-
-        OnCheckedChangeListener myCheckChangelistener = new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                bIsChecked = isChecked;
-            }
-        };
-
-        cbSwitch.setOnCheckedChangeListener(myCheckChangelistener);
-
-
-        //
-        //PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        //wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyWakelockTag");
-        //wakeLock.acquire();
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        wakeLock.release();
     }
 
 
@@ -206,111 +180,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void onEnableWifi(View view)
-    {
-        if (wifiManager.isWifiEnabled()) {
-            wifiManager.setWifiEnabled(false);
-            btWifi.setText("开启");
-        } else {
-            wifiManager.setWifiEnabled(true);
-            btWifi.setText("禁用");
-        }
-    }
-
-    public void onHoursPlus(View view)
-    {
-        if (nHour >= 24){
-            nHour = 1;
-        }else{
-            nHour += 1;
-        }
-        tvHours.setText(getTimeStr(nHour) + '点');
-    }
-
-    public void onHoursSub(View view)
-    {
-        if (nHour <= 1){
-            nHour = 24;
-        }else{
-            nHour -= 1;
-        }
-        tvHours.setText(getTimeStr(nHour) + '点');
-    }
-
-    public void onMinutesPlus(View view)
-    {
-        if (nMinute >= 59){
-            nMinute = 0;
-        }else{
-            nMinute += 1;
-        }
-        tvMinutes.setText(getTimeStr(nMinute) + '分');
-    }
-
-    public void onMinutesSub(View view)
-    {
-        if (nMinute <= 0){
-            nMinute = 59;
-        }else{
-            nMinute -= 1;
-        }
-        tvMinutes.setText(getTimeStr(nMinute) + '分');
-    }
-
-    public void onYearPlus(View view)
-    {
-        nYear += 1;
-        tvYear.setText(getTimeStr(nYear) + '年');
-    }
-
-    public void onYearSub(View view)
-    {
-
-        nYear -= 1;
-        tvYear.setText(getTimeStr(nYear) + '年');
-    }
-
-    public void onMonthPlus(View view)
-    {
-        if (nMonth >= 12){
-            nMonth = 1;
-        }else{
-            nMonth += 1;
-        }
-        tvMonth.setText(getTimeStr(nMonth) + '月');
-    }
-
-    public void onMonthSub(View view)
-    {
-        if (nMonth <= 1){
-            nMonth = 12;
-        }else{
-            nMonth -= 1;
-        }
-        tvMonth.setText(getTimeStr(nMonth) + '月');
-    }
-
-    public void onDayPlus(View view)
-    {
-        if (nDay >= 31){
-            nDay = 1;
-        }else{
-            nDay += 1;
-        }
-        tvDay.setText(getTimeStr(nDay) + '号');
-    }
-
-    public void onDaySub(View view)
-    {
-        if (nDay <= 1){
-            nDay = 31;
-        }else{
-            nDay -= 1;
-        }
-        tvDay.setText(getTimeStr(nDay) + '号');
-    }
-
-
     public String getTimeStr(int num)
     {
         if (num < 10){
@@ -320,33 +189,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void onEnableWifi2(View view){
-
-        btWifi2.setText("进行中");
-
-        CountDownTimer cdt = new CountDownTimer(1000 * 60 * 30, 1000 * 60 * 30)//参数1：计时总时间，参数2：每次扣除时间数
-        {
-
-            @Override
-            public void onTick(long millisUntilFinished)
-            {
-                //定时时间到执行动作;
-            }
-
-            @Override
-
-            public void onFinish() {
-
-                wifiManager.setWifiEnabled(false);
-                btWifi.setText("开启");
-            }
-
-        };
-
-        cdt.start();
-    }
-
-    public void onScreen(View view){
-        screenImageView.setVisibility(View.VISIBLE);
-    }
 }
